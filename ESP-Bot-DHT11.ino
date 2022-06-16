@@ -3,6 +3,7 @@
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
 #include "DHT.h"
+#include <math.h>
 
 #define DHTPIN 4 
 #define DHTTYPE DHT11 
@@ -13,10 +14,6 @@
 #define BOT_TOKEN "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 DHT dht(DHTPIN, DHTTYPE);
-//float temperatureC;
-//float humidity;
-int temperatureC;
-int humidity;
 const unsigned long BOT_MTBS = 1000; // mean time between scan messages
 
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
@@ -48,18 +45,18 @@ void handleNewMessages(int numNewMessages)
     {
       digitalWrite(ledPin, HIGH); // turn the LED on (HIGH is the voltage level)
       ledStatus = 1;
-      bot.sendMessage(chat_id, "Bitki sulanıyor. 🌸💧💦 \n5 saniye sonra işlem tamamlanacak! ⏳", "");
+      bot.sendMessage(chat_id, "*Bitki sulanıyor. 🌸💧💦 \n5 saniye sonra işlem tamamlanacak! ⏳ *", "Markdown");
       delay(5000);
       ledStatus = 0;
       digitalWrite(ledPin, LOW);
-      bot.sendMessage(chat_id, "Bitki sulandı. 🌸💧✅ \nSu hayattır, teşekkürler. 🥰🦆", "");      
+      bot.sendMessage(chat_id, "*Bitki sulandı. 🌸💧✅ \nSu hayattır, teşekkürler. 🥰🦆 *", "Markdown");      
     }
     if (text == "/kapat")
     {
       ledStatus = 0;
       digitalWrite(ledPin, LOW); // turn the LED off (LOW is the voltage level)
       digitalWrite(vol, LOW);
-      bot.sendMessage(chat_id, "Sulama durduruldu. ⛔ \nSu pompası kapatıldı..! ❌", "");
+      bot.sendMessage(chat_id, "*Sulama durduruldu. ⛔ \nSu pompası kapatıldı..! ❌ *", "Markdown");
       digitalWrite(vol, HIGH);
     }
 
@@ -71,35 +68,39 @@ void handleNewMessages(int numNewMessages)
       }
       else
       {
-        String durum = "Wifi SSID:  xxxxxx";
-        //durum += durum.concat(WIFI_SSID);
+        String durum = "*Wifi SSID:      *" + WiFi.SSID() + "";
         durum += "\n";
         IPAddress ip = WiFi.localIP();
         ipAddress = ip.toString();
-        durum += "IP Adresi: " + ipAddress + "";
+        durum += "*IP Adresi:    *" + ipAddress + "";
         durum += "\n";
         durum += "Bitki şuan sulanmıyor. 🚱⚠ \nSistem beklemede! ⏳ ";
         bot.sendMessage(chat_id, durum, "Markdown");
       }
     }
+
     if (text == "/iklim")
-      {   String msg = "Ortam Sıcaklığı:    ";
-          msg += msg.concat(temperatureC);
-          msg += " °C\n";
-          msg += "Nem Oranı:           ";
-          msg += msg.concat(humidity);
-          msg += " %";
-          bot.sendMessage(chat_id,msg, ""); 
+      {   
+          float t = dht.readTemperature();
+          int h = dht.readHumidity();
+          String msg = "*Ortam Sıcaklığı :    *";
+          msg += ("%0.2f", t);
+          msg += " °C  🌡️\n";
+          msg += "*Nem Oranı:             *";
+          msg += round(h);
+          msg += "  %  ♨";
+          bot.sendMessage(chat_id,msg, "Markdown"); 
       }
+
     if (text == "/start")
     {
-      String welcome = "Hoşgeldin, " + from_name + ". 🦆\n";
-      welcome += "Uzaktan Bitki Sulama Sistemi TA2KVC 2022\n\n";
-      welcome += "/cicek : Bitkiyi 5 saniye boyunca sulayıp, otomatik kapanır.\n";
-      welcome += "/iklim : Ortam sıcaklığı ve nem oranı bilgilerini verir.\n";
-      welcome += "/kapat : Sulamayı durdurup, su pompasını kapatır.\n";
-      welcome += "/durum : Sistem durumu hakkında bilgi verir.\n";
-      welcome += "/start : Başlangıç ekranını ve komutları listeler.\n";
+      String welcome = "*Hoşgeldin, *" + from_name + ". 🦆\n";
+      welcome += "*Uzaktan Bitki Sulama Sistemi TA2KVC 2022* \n\n";
+      welcome += "* /cicek : * Bitkiyi 5 saniye boyunca sulayıp, otomatik kapanır.\n";
+      welcome += "* /iklim : * Ortam sıcaklığı ve nem oranı bilgilerini verir.\n";
+      welcome += "* /kapat : * Sulamayı durdurup, su pompasını kapatır.\n";
+      welcome += "* /durum : * Sistem durumu hakkında bilgi verir.\n";
+      welcome += "* /start : * Başlangıç ekranını ve komutları listeler.\n";
       bot.sendMessage(chat_id, welcome, "Markdown");
     }
   }
@@ -142,9 +143,9 @@ void setup()
 
 void loop()
 {
-  humidity = dht.readHumidity()/10;
-  temperatureC = dht.readTemperature()/10;
-  
+  float t = dht.readTemperature();
+  int h = dht.readHumidity();
+   
   if (millis() - bot_lasttime > BOT_MTBS)
   {
     int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
