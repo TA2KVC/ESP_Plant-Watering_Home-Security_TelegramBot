@@ -3,7 +3,6 @@
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
 #include "DHT.h"
-#include <math.h>
 
 #define DHTPIN 4 
 #define DHTTYPE DHT11 
@@ -43,7 +42,7 @@ void handleNewMessages(int numNewMessages)
 
     if (text == "/cicek")
     {
-      digitalWrite(ledPin, HIGH); // turn the LED on (HIGH is the voltage level)
+      digitalWrite(ledPin, HIGH);
       ledStatus = 1;
       bot.sendMessage(chat_id, "*Bitki sulanıyor. 🌸💧💦 \n5 saniye sonra işlem tamamlanacak! ⏳ *", "Markdown");
       delay(5000);
@@ -54,7 +53,7 @@ void handleNewMessages(int numNewMessages)
     if (text == "/kapat")
     {
       ledStatus = 0;
-      digitalWrite(ledPin, LOW); // turn the LED off (LOW is the voltage level)
+      digitalWrite(ledPin, LOW);
       digitalWrite(vol, LOW);
       bot.sendMessage(chat_id, "*Sulama durduruldu. ⛔ \nSu pompası kapatıldı..! ❌ *", "Markdown");
       digitalWrite(vol, HIGH);
@@ -82,12 +81,12 @@ void handleNewMessages(int numNewMessages)
     if (text == "/iklim")
       {   
           float t = dht.readTemperature();
-          int h = dht.readHumidity();
+          float h = dht.readHumidity();
           String msg = "*Ortam Sıcaklığı :    *";
           msg += ("%0.2f", t);
           msg += " °C  🌡️\n";
-          msg += "*Nem Oranı:             *";
-          msg += round(h);
+          msg += "*Nem Oranı :             *";
+          msg += ("%0.2f", h);
           msg += "  %  ♨";
           bot.sendMessage(chat_id,msg, "Markdown"); 
       }
@@ -111,10 +110,10 @@ void setup()
   Serial.begin(115200);
   Serial.println();
   dht.begin();
-  pinMode(ledPin, OUTPUT); // initialize digital ledPin as an output.
+  pinMode(ledPin, OUTPUT);
   pinMode(vol, OUTPUT);
   delay(10);
-  digitalWrite(ledPin, LOW); // initialize pin as off (active LOW)
+  digitalWrite(ledPin, LOW);
   digitalWrite(vol, HIGH);
   // attempt to connect to Wifi network:
   configTime(0, 0, "pool.ntp.org");      // get UTC time via NTP
