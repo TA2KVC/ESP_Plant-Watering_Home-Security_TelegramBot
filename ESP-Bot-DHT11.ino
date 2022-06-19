@@ -142,9 +142,6 @@ void setup()
 
 void loop()
 {
-  float t = dht.readTemperature();
-  int h = dht.readHumidity();
-   
   if (millis() - bot_lasttime > BOT_MTBS)
   {
     int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
