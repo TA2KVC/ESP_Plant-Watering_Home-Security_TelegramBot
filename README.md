@@ -12,3 +12,7 @@ D2 pinine (GPIO4) DHT11 sensör sinyali bağlanmıştır.
 
 ESP8266 powered Remote Plant Watering System with Telegram Bot Library
 including DHT11 temperature and humidity sensor
+
+
+
+![IMG_20220620_234032](https://user-images.githubusercontent.com/62475996/174675151-ea70ebae-1020-4480-9d06-ffd4e4574ccf.jpg)
